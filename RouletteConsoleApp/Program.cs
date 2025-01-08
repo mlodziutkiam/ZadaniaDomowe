@@ -249,7 +249,7 @@ while (keepPlaying)
         Console.WriteLine("Masz za mało pieniędzy, aby kontynuować grę. Gra kończy się!");
         break;
     }
-    Console.WriteLine("Welcome gambler, what would you like to place your bet on?");
+    Console.WriteLine("Witaj hazardzisto! Co chciałbyś obstawić?");
     Console.WriteLine("1 = Number");
     Console.WriteLine("2 = Color");
     Console.WriteLine("3 = Range");
