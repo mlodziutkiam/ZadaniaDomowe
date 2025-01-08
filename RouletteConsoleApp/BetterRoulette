@@ -1,1 +1,155 @@
+using System;
+using System.Collections.Generic;
+
+class RouletteGame
+{
+    static void Main()
+    {
+        var numbers = GenerateRouletteNumbers();
+        int balance = 1000;
+        bool keepPlaying = true;
+
+        Console.WriteLine("Welcome to the Roulette Game!");
+
+        while (keepPlaying)
+        {
+            Console.WriteLine($"\nYour balance: {balance} $");
+
+            if (balance <= 0)
+            {
+                Console.WriteLine("You're out of balance. Better luck next time!");
+                break;
+            }
+
+            Console.WriteLine("What would you like to bet on?");
+            Console.WriteLine("1 = Number\n2 = Color\n3 = Range\n4 = Even/Odd\n5 = Quit");
+            if (!int.TryParse(Console.ReadLine(), out int betType) || betType < 1 || betType > 5)
+            {
+                Console.WriteLine("Invalid choice. Please try again.");
+                continue;
+            }
+
+            if (betType == 5)
+            {
+                Console.WriteLine("Thanks for playing!");
+                break;
+            }
+
+            Console.WriteLine("Enter your bet amount:");
+            if (!int.TryParse(Console.ReadLine(), out int betAmount) || betAmount <= 0 || betAmount > balance)
+            {
+                Console.WriteLine("Invalid bet amount. Please try again.");
+                continue;
+            }
+
+            string userBet = GetUserBet(betType);
+            if (string.IsNullOrEmpty(userBet)) continue;
+
+            var result = SpinRoulette(numbers);
+            Console.WriteLine($"The ball landed on {result.Color} {result.Value}.");
+
+            int payoutMultiplier = GetPayoutMultiplier(betType, userBet, result, out bool isWin);
+            if (isWin)
+            {
+                int winnings = betAmount * payoutMultiplier;
+                balance += winnings;
+                Console.WriteLine($"You won {winnings} $! New balance: {balance} $.");
+            }
+            else
+            {
+                balance -= betAmount;
+                Console.WriteLine($"You lost {betAmount} $. New balance: {balance} $.");
+            }
+        }
+    }
+
+    static List<Number> GenerateRouletteNumbers()
+    {
+        var numbers = new List<Number>();
+        string[] colors = { "Green", "Red", "Black" };
+        for (int i = 0; i <= 36; i++)
+        {
+            string color = i == 0 ? "Green" : (i % 2 == 0 ? "Black" : "Red");
+            numbers.Add(new Number { Value = i, Color = color });
+        }
+        return numbers;
+    }
+
+    static string GetUserBet(int betType)
+    {
+        switch (betType)
+        {
+            case 1:
+                Console.WriteLine("Choose a number (0-36):");
+                string numberBet = Console.ReadLine();
+                if (int.TryParse(numberBet, out int betNumber) && betNumber >= 0 && betNumber <= 36)
+                    return numberBet;
+                Console.WriteLine("Invalid number. Please try again.");
+                break;
+            case 2:
+                Console.WriteLine("Choose a color (Red, Black, Green):");
+                string colorBet = Console.ReadLine();
+                if (colorBet.Equals("Red") ||
+                    colorBet.Equals("Black") ||
+                    colorBet.Equals("Green"))
+                    return colorBet;
+                Console.WriteLine("Invalid color. Please try again.");
+                break;
+            case 3:
+                Console.WriteLine("Choose a range (1-12, 13-24, 25-36):");
+                string rangeBet = Console.ReadLine();
+                if (rangeBet == "1-12" || rangeBet == "13-24" || rangeBet == "25-36")
+                    return rangeBet;
+                Console.WriteLine("Invalid range. Please try again.");
+                break;
+            case 4:
+                Console.WriteLine("Choose Even or Odd:");
+                string parityBet = Console.ReadLine();
+                if (parityBet.Equals("Even") || parityBet.Equals("Odd"))
+                    return parityBet;
+                Console.WriteLine("Invalid choice. Please try again.");
+                break;
+        }
+        return null;
+    }
+
+    static Number SpinRoulette(List<Number> numbers)
+    {
+        var rnd = new Random();
+        int randomIndex = rnd.Next(numbers.Count);
+        return numbers[randomIndex];
+    }
+
+    static int GetPayoutMultiplier(int betType, string userBet, Number result, out bool isWin)
+    {
+        isWin = false;
+        switch (betType)
+        {
+            case 1:
+                isWin = result.Value == int.Parse(userBet);
+                return 36;
+            case 2:
+                isWin = result.Color.Equals(userBet);
+                return 2;
+            case 3:
+                if (userBet == "1-12") isWin = result.Value >= 1 && result.Value <= 12;
+                else if (userBet == "13-24") isWin = result.Value >= 13 && result.Value <= 24;
+                else if (userBet == "25-36") isWin = result.Value >= 25 && result.Value <= 36;
+                return 3;
+            case 4:
+                if (userBet.Equals("Even"))
+                    isWin = result.Value % 2 == 0 && result.Value != 0;
+                else if (userBet.Equals("Odd"))
+                    isWin = result.Value % 2 != 0;
+                return 2;
+        }
+        return 0;
+    }
+}
+
+class Number
+{
+    public int Value { get; set; }
+    public string Color { get; set; }
+}
 
