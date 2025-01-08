@@ -17,7 +17,7 @@ class RouletteGame
 
             if (balance <= 0)
             {
-                Console.WriteLine("You're out of balance. Better luck next time!");
+                Console.WriteLine("You don't have any money left! The game ends!");
                 break;
             }
 
