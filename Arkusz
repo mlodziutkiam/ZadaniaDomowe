@@ -1,0 +1,93 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        string[] lines = File.ReadAllLines("liczby.txt");
+
+        if (lines.Length < 2)
+        {
+            Console.WriteLine("Błąd: Plik powinien zawierać dwa wiersze.");
+            return;
+        }
+
+        // Wczytanie liczb pierwszych z pierwszego wiersza
+        int[] liczbyPierwsze = lines[0].Split().Select(int.Parse).Where(IsPrime).ToArray();
+
+        // Wczytanie liczb z drugiego wiersza
+        int[] liczbyDrugiegoWiersza = lines[1].Split().Select(int.Parse).ToArray();
+
+        // Tworzymy słownik, który liczy wystąpienia każdej liczby pierwszej w pierwszym wierszu
+        Dictionary<int, int> pierwszeWystapienia = liczbyPierwsze.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+
+        // Zadanie 4.1 - Liczenie liczb pierwszych, które są dzielnikami jakiejkolwiek liczby z drugiego wiersza
+        int licznikDzielnikow = liczbyPierwsze.Count(liczba1 => liczbyDrugiegoWiersza.Any(liczba2 => liczba2 % liczba1 == 0));
+
+        // Zadanie 4.2 - Znalezienie 101. największej liczby pierwszej po posortowaniu malejąco
+        int[] posortowanePierwsze = liczbyPierwsze.OrderByDescending(x => x).ToArray();
+        int wynik102 = posortowanePierwsze.Length >= 101 ? posortowanePierwsze[100] : -1; // Jeśli mniej niż 101 liczb, zwracamy -1
+
+        // Zadanie 4.3 - Sprawdzanie, które liczby z drugiego wiersza można zbudować jako iloczyn liczb z pierwszego wiersza
+        List<int> liczbyDoWypisania = new List<int>();
+        foreach (int liczba in liczbyDrugiegoWiersza)
+        {
+            if (MoznaPrzedstawicJakoIloczyn(liczba, pierwszeWystapienia))
+            {
+                liczbyDoWypisania.Add(liczba);
+            }
+        }
+
+        // Zapis wyników do pliku wynik4.txt
+        using (StreamWriter writer = new StreamWriter("wyniki4.txt"))
+        {
+            writer.WriteLine($"4.1 {licznikDzielnikow}");
+            writer.WriteLine($"4.2 {wynik102}");
+            writer.WriteLine($"4.3 {string.Join(" ", liczbyDoWypisania)}");
+        }
+
+        // Wypisanie wyników na ekran
+        Console.WriteLine($"4.1: {licznikDzielnikow}");
+        Console.WriteLine($"4.2: {wynik102}");
+        Console.WriteLine($"4.3: {string.Join(" ", liczbyDoWypisania)}");
+    }
+
+    // Funkcja sprawdzająca, czy liczba jest pierwsza
+    static bool IsPrime(int num)
+    {
+        if (num < 2) return false;
+        for (int i = 2; i * i <= num; i++)
+        {
+            if (num % i == 0) return false;
+        }
+        return true;
+    }
+
+    // Funkcja sprawdzająca, czy liczba może być przedstawiona jako iloczyn liczb z pierwszego wiersza
+    static bool MoznaPrzedstawicJakoIloczyn(int liczba, Dictionary<int, int> dostepneLiczby)
+    {
+        Dictionary<int, int> licznikCzynnikow = new Dictionary<int, int>();
+
+        int temp = liczba;
+        foreach (var prime in dostepneLiczby.Keys)
+        {
+            while (temp % prime == 0)
+            {
+                if (!licznikCzynnikow.ContainsKey(prime))
+                    licznikCzynnikow[prime] = 0;
+                
+                licznikCzynnikow[prime]++;
+                temp /= prime;
+
+                // Jeśli przekroczono dostępną liczbę danej liczby pierwszej, przerywamy
+                if (licznikCzynnikow[prime] > dostepneLiczby[prime])
+                    return false;
+            }
+        }
+
+        return temp == 1; // Jeśli po podziale zostało 1, liczba mogła zostać utworzona
+    }
+}
