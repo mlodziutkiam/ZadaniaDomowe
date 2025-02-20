@@ -16,7 +16,7 @@ class Program
         }
 
         // Wczytanie liczb pierwszych z pierwszego wiersza
-        int[] liczbyPierwsze = lines[0].Split().Select(int.Parse).Where(IsPrime).ToArray();
+        int[] liczbyPierwsze = lines[0].Split().Select(int.Parse).ToArray();
 
         // Wczytanie liczb z drugiego wiersza
         int[] liczbyDrugiegoWiersza = lines[1].Split().Select(int.Parse).ToArray();
@@ -53,17 +53,6 @@ class Program
         Console.WriteLine($"4.1: {licznikDzielnikow}");
         Console.WriteLine($"4.2: {wynik102}");
         Console.WriteLine($"4.3: {string.Join(" ", liczbyDoWypisania)}");
-    }
-
-    // Funkcja sprawdzająca, czy liczba jest pierwsza
-    static bool IsPrime(int num)
-    {
-        if (num < 2) return false;
-        for (int i = 2; i * i <= num; i++)
-        {
-            if (num % i == 0) return false;
-        }
-        return true;
     }
 
     // Funkcja sprawdzająca, czy liczba może być przedstawiona jako iloczyn liczb z pierwszego wiersza
